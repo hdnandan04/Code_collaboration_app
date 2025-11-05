@@ -1,12 +1,15 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express'; // <-- Added Request, Response from express
 import jwt from 'jsonwebtoken';
 
+// --- ⬇️ FIX: Extend express.Request to inherit all properties (like header, body, params) ⬇️ ---
 export interface AuthRequest extends Request {
-  user?: { id: string }; // This stays the same
+  user?: { id: string };
 }
+// --- ⬆️ FIX: Extend express.Request ⬆️ ---
 
 const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => {
-  const authHeader = req.header('Authorization');
+  // req.header is now safely inherited from express.Request
+  const authHeader = req.header('Authorization'); 
 
   if (!authHeader) {
     return res.status(401).json({ message: 'No token, authorization denied' });
@@ -19,14 +22,10 @@ const authMiddleware = (req: AuthRequest, res: Response, next: NextFunction) => 
   }
 
   try {
-    // --- ⬇️ THIS IS THE FIX ⬇️ ---
-    // We are now verifying the NEW token structure
-    // It has 'id', not 'userId'
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as { id: string; username: string };
     
     // Add the user's ID to the request object
-    req.user = { id: decoded.id }; // <-- Read from decoded.id
-    // --- ⬆️ END OF FIX ⬆️ ---
+    req.user = { id: decoded.id };
     
     next(); 
   } catch (err) {
