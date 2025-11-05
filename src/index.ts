@@ -63,7 +63,7 @@ app.use('/api/execute', executeRouter);
 app.use('/api/ai', aiRouter);
 app.use('/api/invitations', invitationRouter); // <-- 2. ADD THIS LINE
 
-app.get('/health', (req, res) => {
+app.get('/health', (req: express.Request, res: express.Response) => { // <-- ADDED TYPES
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
 
